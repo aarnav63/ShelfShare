@@ -21,7 +21,7 @@ import com.shelfshare.repository.BookRepository;
 @CrossOrigin(origins = "http://localhost:5173") // Allow your React app to talk to this
 public class BookController {
 
-    @Autowired
+    @Autowired // automatic dependency injection 
     private BookRepository repo;
 
     // GET all books: http://localhost:8080/api/books
@@ -33,12 +33,12 @@ public class BookController {
     // POST (Add) a book: http://localhost:8080/api/books
     @PostMapping
     public Book add(@RequestBody Book book) {
-        book.setStatus("AVAILABLE"); // New books are always available
+        book.setStatus("AVAILABLE"); // newly added books always available
         return repo.save(book);
 
     }
 
-    @PutMapping("/{id}/borrow")
+    @PutMapping("/{id}/borrow")  // updating existing book upon borrowing
     public Book borrowBook(@PathVariable String id, @RequestParam String borrowerId) {
         Book book = repo.findById(id).orElseThrow();
 
@@ -46,6 +46,14 @@ public class BookController {
         book.setStatus("ON_LOAN");
         book.setBorrowerId(borrowerId);
 
+        return repo.save(book);
+    }
+
+    @PutMapping("/{id}/return")   //updates the status
+    public Book returnBook(@PathVariable String id) {
+        Book book = repo.findById(id).orElseThrow();
+        book.setStatus("AVAILABLE");
+        book.setBorrowerId(null); // Clear the borrower
         return repo.save(book);
     }
 }

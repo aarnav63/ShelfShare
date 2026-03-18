@@ -3,7 +3,7 @@ package com.shelfshare.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.Data;
+import lombok.Data; // for getters and setters
 
 @Data // This automatically generates Getters and Setters
 @Document(collection = "books") // This tells MongoDB to store this in a "books" table
