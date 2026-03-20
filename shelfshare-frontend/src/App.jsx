@@ -459,11 +459,9 @@ const handleMicrosoftLogin = () => {
       console.error("Return failed", err);
     }
   };
-
-  const marketplace    = books.filter(b => b.ownerId !== user.id && b.status === 'AVAILABLE');
-  const borrowedByMe   = books.filter(b => b.borrowerId === user.id);
-  const myListings     = books.filter(b => b.ownerId === user.id);
-
+const marketplace    = user ? books.filter(b => b.ownerId !== user.id && b.status === 'AVAILABLE') : [];
+const borrowedByMe   = user ? books.filter(b => b.borrowerId === user.id) : [];
+const myListings     = user ? books.filter(b => b.ownerId === user.id) : [];
   /* ─────────────────────── LOGIN SCREEN ─────────────────────── */
   if (!user) return (
     <>
