@@ -14,5 +14,7 @@ public class Book {
     private String author;
     private String ownerId;     
     private String borrowerId;  
-    private String status;      
+    private String status;    
+    private String ownerName;  
+    private String borrowerName;
 }

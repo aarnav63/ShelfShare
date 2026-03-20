@@ -374,7 +374,15 @@ const getSpineClass = (id) => spineClasses[id % 4] || '';
 
 export default function App() {
   const [books, setBooks]     = useState([]);
-  const [user, setUser]       = useState(localStorage.getItem('shelfshare_user') || null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('shelfshare_user');
+    try {
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      console.error("Error parsing user from storage", e);
+      return null;
+    }
+  });
   const [newBook, setNewBook] = useState({ title: '', author: '' });
 
   /* ─── MSAL Hooks ─── */
@@ -397,23 +405,31 @@ export default function App() {
   }, []);
 
   /* ─── Login Logic ─── */
-  const handleMicrosoftLogin = () => {
-    instance.loginPopup(loginRequest)
-      .then(response => {
-        const email = response.account.username;
+const handleMicrosoftLogin = () => {
+  instance.loginPopup(loginRequest)
+    .then(response => {
+      const email = response.account.username;
+      const fullName = response.account.name; // Get the real name
+
+      if (email.toLowerCase().endsWith("@bennett.edu.in")) {
+        const enrollmentId = email.split('@')[0].toUpperCase();
         
-        // Bennett-only Guard
-        if (email.toLowerCase().endsWith("@bennett.edu.in")) {
-          const enrollmentId = email.split('@')[0].toUpperCase();
-          setUser(enrollmentId);
-          localStorage.setItem('shelfshare_user', enrollmentId);
-        } else {
-          alert("Access Restricted: Please use your official Bennett University email.");
-          instance.logoutPopup();
-        }
-      })
-      .catch(e => console.error("Login failed:", e));
-  };
+        // Create a user object
+        const userData = {
+          id: enrollmentId,
+          name: fullName,
+          email: email
+        };
+
+        setUser(userData);
+        localStorage.setItem('shelfshare_user', JSON.stringify(userData));
+      } else {
+        alert("Please use your Bennett email.");
+        instance.logoutPopup();
+      }
+    })
+    .catch(e => console.error(e));
+};
 
   const handleLogout = () => {
     setUser(null);
@@ -425,13 +441,13 @@ export default function App() {
   const handleAddBook = async (e) => {
     e.preventDefault();
     if (!user) return;
-    await axios.post(API_BASE, { ...newBook, ownerId: user });
+    await axios.post(API_BASE, { ...newBook, ownerId: user.id, ownerName: user.name });
     setNewBook({ title: '', author: '' });
     fetchBooks();
   };
 
   const handleBorrow = async (id) => {
-    await axios.put(`${API_BASE}/${id}/borrow?borrowerId=${user}`);
+    await axios.put(`${API_BASE}/${id}/borrow?borrowerId=${user.id}&borrowerName=${user.name}`);
     fetchBooks();
   };
 
@@ -444,9 +460,9 @@ export default function App() {
     }
   };
 
-  const marketplace    = books.filter(b => b.ownerId !== user && b.status === 'AVAILABLE');
-  const borrowedByMe   = books.filter(b => b.borrowerId === user);
-  const myListings     = books.filter(b => b.ownerId === user);
+  const marketplace    = books.filter(b => b.ownerId !== user.id && b.status === 'AVAILABLE');
+  const borrowedByMe   = books.filter(b => b.borrowerId === user.id);
+  const myListings     = books.filter(b => b.ownerId === user.id);
 
   /* ─────────────────────── LOGIN SCREEN ─────────────────────── */
   if (!user) return (
