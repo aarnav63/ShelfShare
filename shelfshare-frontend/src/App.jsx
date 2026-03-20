@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+/* ─── MSAL Imports ─── */
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { loginRequest } from "./authConfig";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api/books";
 
@@ -47,6 +50,7 @@ const GlobalStyle = () => (
       width: 420px;
       box-shadow: var(--shadow-lg);
       animation: slideUp .5s cubic-bezier(.16,1,.3,1) both;
+      text-align: center;
     }
     .login-logo {
       font-family: 'Playfair Display', serif;
@@ -62,45 +66,27 @@ const GlobalStyle = () => (
       margin-top: 6px;
       margin-bottom: 36px;
     }
-    .field-label {
-      display: block;
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .field-input {
+
+    .btn-microsoft {
       width: 100%;
-      padding: 13px 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .95rem;
-      background: var(--paper);
-      color: var(--ink);
-      transition: border-color .2s, box-shadow .2s;
-      outline: none;
-    }
-    .field-input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px #e8a02022; }
-    .btn-primary {
-      width: 100%;
-      margin-top: 24px;
+      margin-top: 12px;
       padding: 14px;
-      background: var(--ink);
-      color: #fff;
-      border: none;
+      background: #fff;
+      color: #5e5e5e;
+      border: 1.5px solid #e5e5e5;
       border-radius: 10px;
       font-family: 'DM Sans', sans-serif;
       font-size: .95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background .2s, transform .1s;
-      letter-spacing: .02em;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
     }
-    .btn-primary:hover { background: #1e3350; transform: translateY(-1px); }
-    .btn-primary:active { transform: translateY(0); }
+    .btn-microsoft:hover { background: #f7f7f7; border-color: #d1d1d1; transform: translateY(-1px); }
+    .btn-microsoft img { width: 20px; height: 20px; }
 
     /* ── App Shell ── */
     .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
@@ -366,29 +352,6 @@ const GlobalStyle = () => (
     .status-available { background: #d4f0e5; color: var(--green); }
     .status-borrowed  { background: #fde8e8; color: var(--red); }
 
-    /* ── Stats row ── */
-    .stats-row {
-      display: flex; gap: 14px;
-      margin-bottom: 28px;
-    }
-    .stat-card {
-      flex: 1;
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      padding: 18px 20px;
-      box-shadow: var(--shadow);
-    }
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1;
-    }
-    .stat-label { font-size: .78rem; color: var(--muted); margin-top: 4px; }
-
-    /* ── Animations ── */
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(28px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -402,43 +365,66 @@ const GlobalStyle = () => (
       .columns { grid-template-columns: 1fr; }
       .add-panel { padding: 24px 20px; }
       .main-content { padding: 24px 16px; }
-      .stats-row { flex-wrap: wrap; }
     }
   `}</style>
 );
 
-/* ─── Spine color cycling ─── */
 const spineClasses = ['', ' book-spine-alt', ' book-spine-alt2', ' book-spine-alt3'];
 const getSpineClass = (id) => spineClasses[id % 4] || '';
 
 export default function App() {
   const [books, setBooks]     = useState([]);
-  const [user, setUser] = useState(localStorage.getItem('shelfshare_user') || null);
-  const [tempId, setTempId]   = useState('');
+  const [user, setUser]       = useState(localStorage.getItem('shelfshare_user') || null);
   const [newBook, setNewBook] = useState({ title: '', author: '' });
 
+  /* ─── MSAL Hooks ─── */
+  const { instance, accounts } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+
   const fetchBooks = async () => {
-    const res = await axios.get(API_BASE);
-    setBooks(res.data);
+    try {
+      const res = await axios.get(API_BASE);
+      setBooks(res.data);
+    } catch (err) {
+      console.error("Fetch failed", err);
+    }
   };
 
   useEffect(() => {
-  fetchBooks();
-  // Optional: Set up a timer to check for new books every 5 seconds
-  const interval = setInterval(fetchBooks, 2000); 
-  return () => clearInterval(interval); // Clean up on close
-}, []);
-  const handleLogin = (e) => {
-  e.preventDefault();
-  if (tempId.trim()) {
-    const userId = tempId.trim().toUpperCase();
-    setUser(userId);
-    localStorage.setItem('shelfshare_user', userId); // Save it!
-  }
-};
+    fetchBooks();
+    const interval = setInterval(fetchBooks, 3000); 
+    return () => clearInterval(interval);
+  }, []);
 
+  /* ─── Login Logic ─── */
+  const handleMicrosoftLogin = () => {
+    instance.loginPopup(loginRequest)
+      .then(response => {
+        const email = response.account.username;
+        
+        // Bennett-only Guard
+        if (email.toLowerCase().endsWith("@bennett.edu.in")) {
+          const enrollmentId = email.split('@')[0].toUpperCase();
+          setUser(enrollmentId);
+          localStorage.setItem('shelfshare_user', enrollmentId);
+        } else {
+          alert("Access Restricted: Please use your official Bennett University email.");
+          instance.logoutPopup();
+        }
+      })
+      .catch(e => console.error("Login failed:", e));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('shelfshare_user');
+    instance.logoutPopup().catch(e => console.error(e));
+  };
+
+  /* ─── Book Logic ─── */
   const handleAddBook = async (e) => {
     e.preventDefault();
+    if (!user) return;
     await axios.post(API_BASE, { ...newBook, ownerId: user });
     setNewBook({ title: '', author: '' });
     fetchBooks();
@@ -450,26 +436,19 @@ export default function App() {
   };
 
   const handleReturn = async (id) => {
-  try {
-    await axios.put(`${API_BASE}/${id}/return`);
-    // Immediately fetch the updated list so the book moves 
-    // from "Borrowed by me" back to "Marketplace" instantly.
-    await fetchBooks(); 
-  } catch (err) {
-    console.error("Return failed", err);
-  }
-};
-  const handleLogout = () => {
-  setUser(null);
-  localStorage.removeItem('shelfshare_user'); // Clear it!
-};
+    try {
+      await axios.put(`${API_BASE}/${id}/return`);
+      await fetchBooks(); 
+    } catch (err) {
+      console.error("Return failed", err);
+    }
+  };
 
-  /* ─── Derived data ─── */
   const marketplace    = books.filter(b => b.ownerId !== user && b.status === 'AVAILABLE');
   const borrowedByMe   = books.filter(b => b.borrowerId === user);
   const myListings     = books.filter(b => b.ownerId === user);
 
-  /* ─────────────────────── LOGIN ─────────────────────── */
+  /* ─────────────────────── LOGIN SCREEN ─────────────────────── */
   if (!user) return (
     <>
       <GlobalStyle />
@@ -477,16 +456,15 @@ export default function App() {
         <div className="login-card">
           <div className="login-logo">Shelf<span>Share</span></div>
           <p className="login-sub">Bennett University Book Exchange Platform</p>
-          <form onSubmit={handleLogin}>
-            <label className="field-label">Enrollment ID</label>
-            <input
-              className="field-input"
-              placeholder="e.g. E22CSE001"
-              onChange={e => setTempId(e.target.value)}
-              required
-            />
-            <button className="btn-primary" type="submit">Enter Dashboard →</button>
-          </form>
+          
+          <button className="btn-microsoft" onClick={handleMicrosoftLogin}>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="MS" />
+            Sign in with Bennett ID
+          </button>
+          
+          <p style={{ fontSize: '0.7rem', color: '#999', marginTop: '20px' }}>
+            Exclusive to @bennett.edu.in accounts
+          </p>
         </div>
       </div>
     </>
@@ -497,27 +475,19 @@ export default function App() {
     <>
       <GlobalStyle />
       <div className="app-shell">
-
-        {/* Navbar */}
-     <nav className="topnav">
+        <nav className="topnav">
           <div className="nav-logo">Shelf<span>Share</span></div>
           <div className="nav-right">
             <span className="nav-badge">📚 {user}</span>
-            {/* FIX: Call handleLogout instead of just setUser(null) */}
             <button className="btn-ghost" onClick={handleLogout}>Log out</button>
           </div>
         </nav>
 
         <div className="main-content">
-
-          {/* Add Book */}
           <div className="add-panel">
             <div className="add-panel-title">List a Book</div>
             <div className="add-panel-sub">Share a book with your campus community</div>
-            <form
-              style={{ display: 'contents' }}
-              onSubmit={handleAddBook}
-            >
+            <form style={{ display: 'contents' }} onSubmit={handleAddBook}>
               <input
                 className="add-input"
                 placeholder="Book Title"
@@ -536,16 +506,12 @@ export default function App() {
             </form>
           </div>
 
-          {/* Two-column layout */}
           <div className="columns">
-
-            {/* Marketplace */}
             <div>
               <div className="section-header">
                 <span className="section-title">Marketplace</span>
                 <span className="section-count">{marketplace.length} available</span>
               </div>
-
               {marketplace.length === 0 ? (
                 <div className="empty-state">No books available right now.<br />Check back soon!</div>
               ) : marketplace.map(book => (
@@ -563,13 +529,11 @@ export default function App() {
               ))}
             </div>
 
-            {/* My Shelf */}
             <div className="shelf-panel">
               <div className="shelf-header">
                 <div className="shelf-header-title">My Shelf</div>
-                <div className="shelf-header-sub">Your borrowed books & active listings</div>
+                <div className="shelf-header-sub">Your borrowed books & listings</div>
               </div>
-
               <div className="shelf-section">
                 <div className="shelf-section-label">Borrowed by me</div>
                 {borrowedByMe.length === 0 ? (
@@ -581,11 +545,10 @@ export default function App() {
                   </div>
                 ))}
               </div>
-
               <div className="shelf-section">
                 <div className="shelf-section-label">My listings</div>
                 {myListings.length === 0 ? (
-                  <p style={{ fontSize: '.85rem', color: 'var(--muted)' }}>You haven't listed any books.</p>
+                  <p style={{ fontSize: '.85rem', color: 'var(--muted)' }}>No books listed.</p>
                 ) : myListings.map(book => (
                   <div className="shelf-item" key={book.id}>
                     <span className="shelf-item-title">{book.title}</span>
@@ -596,7 +559,6 @@ export default function App() {
                 ))}
               </div>
             </div>
-
           </div>
         </div>
       </div>
