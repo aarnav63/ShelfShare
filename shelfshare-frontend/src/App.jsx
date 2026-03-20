@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_BASE = "http://localhost:8080/api/books";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api/books";
 
 /* ─── Inline global styles ─── */
 const GlobalStyle = () => (
