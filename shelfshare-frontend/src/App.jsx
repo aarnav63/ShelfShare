@@ -337,11 +337,7 @@ const GlobalStyle = () => (
       border-radius: 8px; padding: 7px 10px; cursor: pointer;
       color: var(--text); font-size: 1rem; line-height: 1;
     }
-    .sidebar-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6); z-index: 300; backdrop-filter: blur(4px);
-    }
-    .sidebar-overlay.open { display: block; }
+    .sidebar-overlay { display: none; }
 
     /* ════ BREAKPOINTS ════ */
     @media (max-width: 900px) {
@@ -476,8 +472,8 @@ export default function App() {
 
       {/* Mobile topbar */}
       <div className="mobile-topbar">
-        <div className="mobile-logo">Shelf<span>Share</span></div>
         <button className="hamburger" onClick={() => setSidebarOpen(true)}>☰</button>
+        <div className="mobile-logo">Shelf<span>Share</span></div>
       </div>
 
       {/* Sidebar overlay */}
