@@ -499,11 +499,12 @@ export default function App() {
       <div className="app-shell">
 
         {/* Navbar */}
-        <nav className="topnav">
+     <nav className="topnav">
           <div className="nav-logo">Shelf<span>Share</span></div>
           <div className="nav-right">
             <span className="nav-badge">📚 {user}</span>
-            <button className="btn-ghost" onClick={() => setUser(null)}>Log out</button>
+            {/* FIX: Call handleLogout instead of just setUser(null) */}
+            <button className="btn-ghost" onClick={handleLogout}>Log out</button>
           </div>
         </nav>
 

@@ -18,7 +18,7 @@ import com.shelfshare.repository.BookRepository;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = {"http://localhost:5173", "https://shelfshare-five.vercel.app/"}) // Allow your React app to talk to this
+@CrossOrigin(origins = {"http://localhost:5173", "https://shelfshare-five.vercel.app"}) // Allow your React app to talk to this
 public class BookController {
 
     @Autowired // automatic dependency injection 
