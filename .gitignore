@@ -1,0 +1,16 @@
+# Security: NEVER push these
+.vscode/launch.json
+.env
+
+# Java/Maven: Don't push compiled files
+target/
+*.class
+*.jar
+
+# React/Node: Don't push the heavy modules folder
+node_modules/
+dist/
+
+# System files
+.DS_Store
+Thumbs.db
