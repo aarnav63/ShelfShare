@@ -337,6 +337,12 @@ const GlobalStyle = () => (
       padding: 28px 20px; text-align: center; color: var(--muted); font-size: 0.85rem; font-style: italic;
     }
 
+    @keyframes pulse-red {
+      0% { text-shadow: 0 0 4px rgba(224,92,138,0.2); }
+      50% { text-shadow: 0 0 16px rgba(224,92,138,0.9); }
+      100% { text-shadow: 0 0 4px rgba(224,92,138,0.2); }
+    }
+
     /* ════ MODAL ════ */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 1000;
@@ -428,6 +434,25 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const getDueDateDisplay = (dueDateStr) => {
+    if (!dueDateStr) return null;
+    const due = new Date(dueDateStr);
+    const today = new Date();
+    due.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    const diffTime = due - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return <div className="shelf-row-sub" style={{ color: "var(--rose)", marginTop: "4px", fontWeight: "700", animation: "pulse-red 2s infinite" }}>⚠️ OVERDUE by {Math.abs(diffDays)} day{Math.abs(diffDays) === 1 ? '' : 's'}</div>;
+    } else if (diffDays === 0) {
+      return <div className="shelf-row-sub" style={{ color: "var(--amber)", marginTop: "4px", fontWeight: "700" }}>⏳ Due: Today!</div>;
+    } else {
+      return <div className="shelf-row-sub" style={{ color: "var(--amber)", marginTop: "4px" }}>⏳ Due: {dueDateStr} ({diffDays} days left)</div>;
+    }
+  };
+
  const handleMicrosoftLogin = () => {
     instance.loginPopup(loginRequest).then(response => {
       const email = response.account.username;
@@ -463,7 +488,7 @@ export default function App() {
       const ownerEmail = `${book.ownerId.toLowerCase()}@bennett.edu.in`;
       const subject = encodeURIComponent(`ShelfShare: Request to borrow "${book.title}"`);
       const body = encodeURIComponent(
-        `Hi ${book.ownerName || 'there'},\n\nI would love to borrow your book "${book.title}" that you listed on ShelfShare!\n\nPlease head over to your "My Shelf" dashboard to approve my request whenever you're ready: https://shelfshare-five.vercel.app\n\nThanks!\n${user.name}`
+        `Hi ${book.ownerName || 'there'},\n\nI would love to borrow your book "${book.title}" that you listed on ShelfShare!\n\nPlease head over to your "My Shelf" dashboard to approve my request whenever you're ready: https://shelfshare-five.vercel.app\n\nWhen and where would be a good time to meet up on campus so I can grab the book from you?\n\nThanks!\n${user.name}`
       );
       
       // Reverted back to Outlook Web deep-link as requested
@@ -653,7 +678,7 @@ export default function App() {
                           <div>
                             <div className="shelf-row-title">{book.title}</div>
                             <div className="shelf-row-sub">{book.author}</div>
-                            {book.dueDate && <div className="shelf-row-sub" style={{ color: "var(--amber)", marginTop: "4px" }}>⏳ Due: {book.dueDate}</div>}
+                            {getDueDateDisplay(book.dueDate)}
                           </div>
                           <button className="btn-return" onClick={() => handleReturn(book.id)}>Return</button>
                         </div>
@@ -671,7 +696,7 @@ export default function App() {
                             {book.status !== 'AVAILABLE'
                               ? <div>
                                   <div className="shelf-row-sub">→ {book.borrowerName || book.borrowerId}</div>
-                                  {book.dueDate && <div className="shelf-row-sub" style={{ color: "var(--amber)", marginTop: "4px" }}>⏳ Due: {book.dueDate}</div>}
+                                  {getDueDateDisplay(book.dueDate)}
                                 </div>
                               : (book.requests && book.requests.length > 0)
                                 ? <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
