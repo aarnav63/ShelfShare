@@ -653,6 +653,7 @@ export default function App() {
                           <div>
                             <div className="shelf-row-title">{book.title}</div>
                             <div className="shelf-row-sub">{book.author}</div>
+                            {book.dueDate && <div className="shelf-row-sub" style={{ color: "var(--amber)", marginTop: "4px" }}>⏳ Due: {book.dueDate}</div>}
                           </div>
                           <button className="btn-return" onClick={() => handleReturn(book.id)}>Return</button>
                         </div>
