@@ -18,17 +18,15 @@ const GlobalStyle = () => (
       --text:         #e8edf5;
       --dim:          #6b7a90;
       --muted:        #3a4555;
-
-      --amber:      #f5a623;
-      --amber-glow: rgba(245,166,35,0.35);
-      --blue:       #4a90d9;
-      --blue-glow:  rgba(74,144,217,0.35);
-      --green:      #2ecc8f;
-      --green-glow: rgba(46,204,143,0.35);
-      --rose:       #e05c8a;
-      --rose-glow:  rgba(224,92,138,0.35);
-
-      --sidebar-w: 260px;
+      --amber:        #f5a623;
+      --amber-glow:   rgba(245,166,35,0.35);
+      --blue:         #4a90d9;
+      --blue-glow:    rgba(74,144,217,0.35);
+      --green:        #2ecc8f;
+      --green-glow:   rgba(46,204,143,0.35);
+      --rose:         #e05c8a;
+      --rose-glow:    rgba(224,92,138,0.35);
+      --sidebar-w:    260px;
     }
 
     html, body { height: 100%; }
@@ -63,9 +61,7 @@ const GlobalStyle = () => (
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
     /* ════ LOGIN ════ */
-    .login-wrap {
-      min-height: 100vh; display: grid; place-items: center; position: relative;
-    }
+    .login-wrap { min-height: 100vh; display: grid; place-items: center; position: relative; }
     .login-card {
       position: relative; z-index: 1;
       background: rgba(18,24,38,0.78);
@@ -98,26 +94,11 @@ const GlobalStyle = () => (
       background: rgba(245,166,35,0.12);
       box-shadow: 0 0 40px var(--amber-glow); transform: translateY(-1px);
     }
-    .login-footer-links {
-      margin-top: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.82rem;
-      color: var(--dim);
-      gap: 16px;
-      white-space: nowrap;
-    }
-    .login-footer-links a {
-      color: var(--dim); text-decoration: underline; text-underline-offset: 3px;
-      cursor: pointer; transition: color 0.2s; white-space: nowrap;
-    }
-    .login-footer-links a:hover { color: var(--text); }
-    .login-footer-links span { white-space: nowrap; }
 
     /* ════ APP SHELL ════ */
     .app-shell { min-height: 100vh; display: flex; position: relative; z-index: 1; }
 
+    /* ── Sidebar ── */
     .sidebar {
       width: var(--sidebar-w); flex-shrink: 0;
       background: rgba(255,255,255,0.03);
@@ -132,9 +113,7 @@ const GlobalStyle = () => (
       letter-spacing: -0.02em; color: var(--text); margin-bottom: 40px; padding-left: 8px;
     }
     .sidebar-logo span { color: var(--amber); }
-
     .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-
     .nav-item {
       display: flex; align-items: center; gap: 12px;
       padding: 11px 12px; border-radius: 10px; cursor: pointer;
@@ -144,9 +123,7 @@ const GlobalStyle = () => (
       font-family: 'Inter', sans-serif; position: relative;
     }
     .nav-item:hover { background: var(--glass); color: var(--text); }
-    .nav-item.active {
-      background: rgba(255,255,255,0.06); color: var(--text); border-color: var(--glass-border);
-    }
+    .nav-item.active { background: rgba(255,255,255,0.06); color: var(--text); border-color: var(--glass-border); }
     .nav-item.active::before {
       content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
       width: 3px; background: var(--amber); border-radius: 0 3px 3px 0;
@@ -177,6 +154,7 @@ const GlobalStyle = () => (
     }
     .btn-logout:hover { color: var(--rose); }
 
+    /* ── Main area ── */
     .main-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .main-header { padding: 36px 36px 0; }
     .page-title {
@@ -185,13 +163,35 @@ const GlobalStyle = () => (
     }
     .main-content { flex: 1; padding: 28px 36px 40px; }
 
+    /* ── Search bar ── */
+    .search-bar-container {
+      margin-top: 18px; position: relative; max-width: 480px;
+    }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--dim); font-size: 0.9rem; pointer-events: none;
+    }
+    .search-field {
+      width: 100%; padding: 11px 16px 11px 40px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'Inter', sans-serif; font-size: 0.88rem; outline: none;
+      transition: all 0.2s;
+    }
+    .search-field::placeholder { color: var(--muted); }
+    .search-field:focus {
+      border-color: rgba(245,166,35,0.4);
+      background: rgba(255,255,255,0.06);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.07);
+    }
+
     /* ════ ADD BOOK PANEL ════ */
     .add-panel {
       background: rgba(20,28,45,0.5);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--glass-border); border-radius: 16px;
-      padding: 28px 28px;
-      display: flex; flex-direction: column; gap: 14px;
+      padding: 28px 28px; display: flex; flex-direction: column; gap: 14px;
       position: relative; overflow: hidden; max-width: 520px;
     }
     .add-panel::before {
@@ -217,7 +217,7 @@ const GlobalStyle = () => (
     .add-input::placeholder { color: var(--muted); }
     .add-input:focus {
       border-color: rgba(245,166,35,0.5);
-      box-shadow: 0 0 0 3px rgba(245,166,35,0.08), 0 0 16px rgba(245,166,35,0.1);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.08);
       background: rgba(255,255,255,0.07);
     }
     .btn-submit {
@@ -239,32 +239,39 @@ const GlobalStyle = () => (
     }
     .book-card {
       background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
-      border-radius: 16px; padding: 22px 20px;
-      display: flex; align-items: center; gap: 18px;
+      border-radius: 16px; padding: 24px 20px;
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
       transition: all 0.25s ease;
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      position: relative; overflow: hidden;
     }
+    .book-card::before {
+      content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px;
+      border-radius: 0 0 4px 4px;
+    }
+    .book-card.spine-amber::before { background: var(--amber); box-shadow: 0 0 12px var(--amber-glow); }
+    .book-card.spine-blue::before  { background: var(--blue);  box-shadow: 0 0 12px var(--blue-glow); }
+    .book-card.spine-green::before { background: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+    .book-card.spine-rose::before  { background: var(--rose);  box-shadow: 0 0 12px var(--rose-glow); }
     .book-card:hover {
       background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14);
       transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.4);
     }
-    .book-spine {
-      width: 10px; flex-shrink: 0; align-self: stretch; border-radius: 6px; min-height: 64px;
-    }
+    .book-spine { display: none; }
     .spine-amber { background: var(--amber);  box-shadow: 0 0 18px var(--amber-glow), 0 0 6px var(--amber-glow); }
     .spine-blue  { background: var(--blue);   box-shadow: 0 0 18px var(--blue-glow),  0 0 6px var(--blue-glow); }
     .spine-green { background: var(--green);  box-shadow: 0 0 18px var(--green-glow), 0 0 6px var(--green-glow); }
     .spine-rose  { background: var(--rose);   box-shadow: 0 0 18px var(--rose-glow),  0 0 6px var(--rose-glow); }
 
-    .book-info { flex: 1; min-width: 0; }
+    .book-card-body { flex: 1; min-width: 0; text-align: center; }
+    .book-card-footer { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
     .book-title {
-      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
-      color: var(--text); margin-bottom: 5px; letter-spacing: -0.01em;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
+      color: var(--text); letter-spacing: -0.01em;
+      line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;
     }
-    .book-author { font-size: 0.8rem; color: var(--dim); }
-    .book-owner  { font-size: 0.72rem; color: var(--muted); margin-top: 5px; }
-
+    .book-author { font-size: 0.8rem; color: var(--dim); margin-top: 3px; }
+    .book-owner  { font-size: 0.72rem; color: var(--muted); }
     .btn-borrow {
       flex-shrink: 0; padding: 7px 14px;
       background: transparent; color: var(--amber);
@@ -272,14 +279,16 @@ const GlobalStyle = () => (
       font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.75rem;
       cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em;
     }
-    .btn-borrow:hover {
+    .btn-borrow:hover:not(:disabled) {
       background: rgba(245,166,35,0.12); border-color: var(--amber);
       box-shadow: 0 0 12px var(--amber-glow);
+    }
+    .btn-borrow:disabled {
+      opacity: 0.5; cursor: not-allowed; border-color: transparent; box-shadow: none;
     }
 
     /* ════ MY SHELF ════ */
     .shelf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
-
     .shelf-section-card {
       background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
       border-radius: 16px; overflow: hidden; backdrop-filter: blur(10px);
@@ -300,7 +309,14 @@ const GlobalStyle = () => (
       flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .shelf-row-sub { font-size: 0.7rem; color: var(--dim); margin-top: 2px; }
-
+    .btn-remove {
+      background: none; border: none; padding: 0; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
+      color: var(--rose); margin-top: 4px; display: inline-block;
+      opacity: 0.7; transition: opacity 0.2s;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .btn-remove:hover { opacity: 1; }
     .btn-return {
       flex-shrink: 0; padding: 5px 12px;
       background: rgba(46,204,143,0.08); color: var(--green);
@@ -309,7 +325,6 @@ const GlobalStyle = () => (
       cursor: pointer; transition: all 0.2s;
     }
     .btn-return:hover { background: rgba(46,204,143,0.16); border-color: var(--green); }
-
     .status-pill {
       flex-shrink: 0; font-size: 0.63rem; font-weight: 800;
       padding: 3px 9px; border-radius: 20px; letter-spacing: 0.06em;
@@ -322,7 +337,7 @@ const GlobalStyle = () => (
       padding: 28px 20px; text-align: center; color: var(--muted); font-size: 0.85rem; font-style: italic;
     }
 
-    /* ════ MOBILE ════ */
+    /* ════ MOBILE TOPBAR ════ */
     .mobile-topbar {
       display: none; align-items: center; justify-content: space-between;
       padding: 0 20px; height: 56px;
@@ -359,6 +374,7 @@ const GlobalStyle = () => (
       .page-title  { font-size: 1.5rem; }
       .main-content { padding: 20px 20px 36px; }
       .book-grid { grid-template-columns: 1fr; }
+      .search-bar-container { max-width: 100%; }
     }
 
     @media (max-width: 480px) {
@@ -375,6 +391,7 @@ export default function App() {
   const [books, setBooks]             = useState([]);
   const [view, setView]               = useState('marketplace');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchTerm, setSearchTerm]   = useState('');
   const [user, setUser]               = useState(() => {
     const saved = localStorage.getItem('shelfshare_user');
     try { return saved ? JSON.parse(saved) : null; } catch { return null; }
@@ -395,7 +412,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleMicrosoftLogin = () => {
+ const handleMicrosoftLogin = () => {
     instance.loginPopup(loginRequest).then(response => {
       const email = response.account.username;
       if (email.toLowerCase().endsWith("@bennett.edu.in")) {
@@ -423,8 +440,29 @@ export default function App() {
 
   const handleBorrow = async (id) => {
     if (!user) return;
-    await axios.put(`${API_BASE}/${id}/borrow?borrowerId=${user.id}&borrowerName=${user.name}`);
-    fetchBooks();
+    try {
+      await axios.put(`${API_BASE}/${id}/request?requesterId=${user.id}&requesterName=${user.name}`);
+      fetchBooks();
+    } catch (err) { console.error("Request failed", err); }
+  };
+
+  const handleApprove = async (id, reqId, reqName) => {
+    try {
+      await axios.put(`${API_BASE}/${id}/approve?requesterId=${reqId}&requesterName=${reqName}`);
+      fetchBooks();
+    } catch (err) {
+      console.error("Approval failed", err);
+    }
+  };
+
+  // 3. New: Owner clicks this to reject a request (returns to AVAILABLE)
+  const handleDecline = async (id) => {
+    try {
+      await axios.put(`${API_BASE}/${id}/return`);
+      fetchBooks();
+    } catch (err) {
+      console.error("Decline failed", err);
+    }
   };
 
   const handleReturn = async (id) => {
@@ -432,17 +470,33 @@ export default function App() {
     fetchBooks();
   };
 
-  const marketplace  = user ? books.filter(b => b.ownerId !== user?.id && b.status === 'AVAILABLE') : [];
+  const handleDeleteListing = async (id) => {
+    if (window.confirm("Remove this listing? This can't be undone.")) {
+      try {
+        await axios.delete(`${API_BASE}/${id}`);
+        fetchBooks();
+      } catch (err) {
+        console.error("Delete failed", err);
+        alert("Could not remove the listing. Please try again.");
+      }
+    }
+  };
+
+  const marketplace = user ? books.filter(b => {
+    const term = searchTerm.toLowerCase();
+    const match = b.title.toLowerCase().includes(term) || b.author.toLowerCase().includes(term);
+    return b.ownerId !== user.id && b.status === 'AVAILABLE' && match;
+  }) : [];
   const borrowedByMe = user ? books.filter(b => b.borrowerId === user?.id) : [];
   const myListings   = user ? books.filter(b => b.ownerId === user?.id) : [];
+
+  const handleNav = (id) => { setView(id); setSidebarOpen(false); };
 
   const navItems = [
     { id: 'marketplace', label: 'Marketplace', icon: '⊞' },
     { id: 'shelf',       label: 'My Shelf',    icon: '⊟' },
     { id: 'add',         label: 'Add Book',    icon: '+' },
   ];
-
-  const handleNav = (id) => { setView(id); setSidebarOpen(false); };
 
   /* ── Login ── */
   if (!user) return (
@@ -457,13 +511,12 @@ export default function App() {
             <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" width="20" alt="MS" />
             Sign in with Bennett ID
           </button>
-
         </div>
       </div>
     </>
   );
 
-  const initials = user.name?.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || user.id[0];
+  const initials = user.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || user.id[0];
 
   return (
     <>
@@ -476,8 +529,8 @@ export default function App() {
         <div className="mobile-logo">Shelf<span>Share</span></div>
       </div>
 
-      {/* Sidebar overlay */}
-      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
+      {/* Sidebar overlay (no blur/blackout — just closes on tap) */}
+      <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
 
       <div className="app-shell">
         {/* ── Sidebar ── */}
@@ -512,6 +565,17 @@ export default function App() {
               {view === 'shelf'       && 'My Shelf'}
               {view === 'add'         && 'Add Book'}
             </h1>
+            {view === 'marketplace' && (
+              <div className="search-bar-container">
+                <span className="search-icon">🔍</span>
+                <input
+                  className="search-field"
+                  placeholder="Search by title or author…"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="main-content">
@@ -519,19 +583,27 @@ export default function App() {
             {/* MARKETPLACE */}
             {view === 'marketplace' && (
               marketplace.length === 0
-                ? <div className="empty-state">No books listed yet — be the first!</div>
+                ? <div className="empty-state">{searchTerm ? 'No books match your search.' : 'No books listed yet — be the first!'}</div>
                 : <div className="book-grid">
-                    {marketplace.map(book => (
-                      <div className="book-card" key={book.id}>
-                        <div className={`book-spine ${getSpine(book.id)}`} />
-                        <div className="book-info">
-                          <div className="book-title">{book.title}</div>
-                          <div className="book-author">{book.author}</div>
-                          <div className="book-owner">by {book.ownerName || book.ownerId}</div>
+                    {marketplace.map(book => {
+                      const hasRequested = book.requests?.some(r => r.requesterId === user.id);
+                      return (
+                      <div className={`book-card ${getSpine(book.id)}`} key={book.id}>
+                        <div className="book-card-body">
+                          <div>
+                            <div className="book-title">{book.title}</div>
+                            <div className="book-author">{book.author}</div>
+                          </div>
+                          <div className="book-card-footer">
+                            <div className="book-owner">by {book.ownerName || book.ownerId}</div>
+                            <button className="btn-borrow" onClick={() => handleBorrow(book.id)} disabled={hasRequested}>
+                              {hasRequested ? 'Requested' : 'Borrow'}
+                            </button>
+                          </div>
                         </div>
-                        <button className="btn-borrow" onClick={() => handleBorrow(book.id)}>Borrow</button>
                       </div>
-                    ))}
+                      )
+                    })}
                   </div>
             )}
 
@@ -561,9 +633,20 @@ export default function App() {
                         <div className="shelf-row" key={book.id}>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div className="shelf-row-title">{book.title}</div>
-                            {book.status !== 'AVAILABLE' && (
-                              <div className="shelf-row-sub">→ {book.borrowerName || book.borrowerId}</div>
-                            )}
+                            {book.status !== 'AVAILABLE'
+                              ? <div className="shelf-row-sub">→ {book.borrowerName || book.borrowerId}</div>
+                              : (book.requests && book.requests.length > 0)
+                                ? <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
+                                    {book.requests.map(req => (
+                                      <div key={req.requesterId} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span className="shelf-row-sub" style={{ margin: 0 }}>💬 {req.requesterName} requested</span>
+                                        <button className="btn-return" style={{ padding: '3px 8px', fontSize: '0.65rem' }} onClick={() => handleApprove(book.id, req.requesterId, req.requesterName)}>Approve</button>
+                                      </div>
+                                    ))}
+                                    <button className="btn-remove" style={{ marginTop: '4px', alignSelf: 'flex-start' }} onClick={() => handleDeleteListing(book.id)}>Remove listing</button>
+                                  </div>
+                                : <button className="btn-remove" onClick={() => handleDeleteListing(book.id)}>Remove listing</button>
+                            }
                           </div>
                           <span className={`status-pill ${book.status === 'AVAILABLE' ? 'status-in' : 'status-out'}`}>
                             {book.status === 'AVAILABLE' ? 'In' : 'Out'}
