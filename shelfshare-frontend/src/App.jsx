@@ -337,6 +337,20 @@ const GlobalStyle = () => (
       padding: 28px 20px; text-align: center; color: var(--muted); font-size: 0.85rem; font-style: italic;
     }
 
+    /* ════ MODAL ════ */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(6, 10, 18, 0.85); backdrop-filter: blur(8px); display: grid; place-items: center; padding: 20px;
+    }
+    .modal-content {
+      background: rgba(20, 28, 45, 0.85); border: 1px solid var(--glass-border); border-radius: 16px;
+      padding: 32px; width: 100%; max-width: 440px; text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+    .modal-body { font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--dim); margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 12px; justify-content: center; }
+
     /* ════ MOBILE TOPBAR ════ */
     .mobile-topbar {
       display: none; align-items: center; justify-content: space-between;
@@ -397,6 +411,8 @@ export default function App() {
     try { return saved ? JSON.parse(saved) : null; } catch { return null; }
   });
   const [newBook, setNewBook] = useState({ title: '', author: '' });
+  const [approveModal, setApproveModal] = useState(null); // {id, reqId, reqName, title}
+  const [approveDays, setApproveDays] = useState(14);
   const { instance } = useMsal();
 
   const fetchBooks = async () => {
@@ -457,9 +473,16 @@ export default function App() {
     } catch (err) { console.error("Request failed", err); }
   };
 
-  const handleApprove = async (id, reqId, reqName) => {
+  const handleApprove = (id, reqId, reqName, title) => {
+    setApproveDays(14); // Reset to default 14 days
+    setApproveModal({ id, reqId, reqName, title });
+  };
+
+  const confirmApprove = async () => {
+    if (!approveModal) return;
     try {
-      await axios.put(`${API_BASE}/${id}/approve?requesterId=${reqId}&requesterName=${reqName}`);
+      await axios.put(`${API_BASE}/${approveModal.id}/approve?requesterId=${approveModal.reqId}&requesterName=${approveModal.reqName}&days=${approveDays}`);
+      setApproveModal(null);
       fetchBooks();
     } catch (err) {
       console.error("Approval failed", err);
@@ -645,13 +668,16 @@ export default function App() {
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div className="shelf-row-title">{book.title}</div>
                             {book.status !== 'AVAILABLE'
-                              ? <div className="shelf-row-sub">→ {book.borrowerName || book.borrowerId}</div>
+                              ? <div>
+                                  <div className="shelf-row-sub">→ {book.borrowerName || book.borrowerId}</div>
+                                  {book.dueDate && <div className="shelf-row-sub" style={{ color: "var(--amber)", marginTop: "4px" }}>⏳ Due: {book.dueDate}</div>}
+                                </div>
                               : (book.requests && book.requests.length > 0)
                                 ? <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
                                     {book.requests.map(req => (
                                       <div key={req.requesterId} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span className="shelf-row-sub" style={{ margin: 0 }}>💬 {req.requesterName} requested</span>
-                                        <button className="btn-return" style={{ padding: '3px 8px', fontSize: '0.65rem' }} onClick={() => handleApprove(book.id, req.requesterId, req.requesterName)}>Approve</button>
+                                        <button className="btn-return" style={{ padding: '3px 8px', fontSize: '0.65rem' }} onClick={() => handleApprove(book.id, req.requesterId, req.requesterName, book.title)}>Approve</button>
                                       </div>
                                     ))}
                                     <button className="btn-remove" style={{ marginTop: '4px', alignSelf: 'flex-start' }} onClick={() => handleDeleteListing(book.id)}>Remove listing</button>
@@ -702,6 +728,31 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {approveModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-title">Approve Loan</div>
+            <div className="modal-body">
+              How many days can <b>{approveModal.reqName}</b> borrow "<b>{approveModal.title}</b>" for?
+              <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                <input 
+                  type="number" min="1" max="90" 
+                  value={approveDays} 
+                  onChange={e => setApproveDays(e.target.value)} 
+                  className="add-input" 
+                  style={{ width: '90px', textAlign: 'center', fontSize: '1.2rem' }} 
+                />
+                 <span style={{ color: 'var(--amber)', fontWeight: 'bold' }}>Days</span>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn-remove" style={{ padding: '10px 20px', fontSize: '0.85rem' }} onClick={() => setApproveModal(null)}>Cancel</button>
+              <button className="btn-submit" style={{ width: 'auto', padding: '10px 24px' }} onClick={confirmApprove}>Confirm & Approve</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

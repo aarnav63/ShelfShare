@@ -15,8 +15,9 @@ public class Book {
     private String author;
     private String ownerId;     
     private String borrowerId;  
-    private String status;    
-    private String ownerName;  
+    private String status;
+    private String ownerName;
     private String borrowerName;
     private List<Requester> requests = new ArrayList<>();
+    private String dueDate;
 }

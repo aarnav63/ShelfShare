@@ -69,12 +69,13 @@ public class BookController {
     }
 
     @PutMapping("/{id}/approve")
-    public Book approveBook(@PathVariable String id, @RequestParam String requesterId, @RequestParam String requesterName) {
+    public Book approveBook(@PathVariable String id, @RequestParam String requesterId, @RequestParam String requesterName, @RequestParam int days) {
         Book book = repo.findById(id).orElseThrow();
         book.setStatus("ON_LOAN");
         book.setBorrowerId(requesterId);
         book.setBorrowerName(requesterName);
         book.setRequests(new java.util.ArrayList<>()); // clear other requests
+        book.setDueDate(java.time.LocalDate.now().plusDays(days).toString());
         return repo.save(book);
     }
 
@@ -84,6 +85,7 @@ public class BookController {
         book.setStatus("AVAILABLE");
         book.setBorrowerId(null);
         book.setBorrowerName(null);
+        book.setDueDate(null);
         return repo.save(book);
     }
 
