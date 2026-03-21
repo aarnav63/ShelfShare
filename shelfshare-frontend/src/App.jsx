@@ -438,11 +438,21 @@ export default function App() {
     setView('marketplace');
   };
 
-  const handleBorrow = async (id) => {
+  const handleBorrow = async (book) => {
     if (!user) return;
     try {
-      await axios.put(`${API_BASE}/${id}/request?requesterId=${user.id}&requesterName=${user.name}`);
+      await axios.put(`${API_BASE}/${book.id}/request?requesterId=${user.id}&requesterName=${user.name}`);
       fetchBooks();
+      
+      const ownerEmail = `${book.ownerId.toLowerCase()}@bennett.edu.in`;
+      const subject = encodeURIComponent(`ShelfShare: Request to borrow "${book.title}"`);
+      const body = encodeURIComponent(
+        `Hi ${book.ownerName || book.ownerId},\n\nI would love to borrow your book "${book.title}" that you listed on ShelfShare!\n\nPlease head over to your "My Shelf" dashboard to approve my request whenever you're ready: https://shelfshare-five.vercel.app\n\nThanks!\n${user.name}`
+      );
+      
+      const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${ownerEmail}&subject=${subject}&body=${body}`;
+      window.open(outlookUrl, '_blank');
+
     } catch (err) { console.error("Request failed", err); }
   };
 
@@ -596,7 +606,7 @@ export default function App() {
                           </div>
                           <div className="book-card-footer">
                             <div className="book-owner">by {book.ownerName || book.ownerId}</div>
-                            <button className="btn-borrow" onClick={() => handleBorrow(book.id)} disabled={hasRequested}>
+                            <button className="btn-borrow" onClick={() => handleBorrow(book)} disabled={hasRequested}>
                               {hasRequested ? 'Requested' : 'Borrow'}
                             </button>
                           </div>
