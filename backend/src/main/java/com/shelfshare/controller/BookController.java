@@ -20,7 +20,7 @@ import com.shelfshare.repository.BookRepository;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = { "http://localhost:5173", "https://shelfshare-five.vercel.app" }, methods = { RequestMethod.GET,
+@CrossOrigin(origins = { "http://localhost:5173", "https://shelfshare-one.vercel.app" }, methods = { RequestMethod.GET,
         RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS }, allowedHeaders = "*") // Allow
                                                                                                                     // your
                                                                                                                     // React

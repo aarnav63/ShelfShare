@@ -488,7 +488,7 @@ export default function App() {
       const ownerEmail = `${book.ownerId.toLowerCase()}@bennett.edu.in`;
       const subject = encodeURIComponent(`ShelfShare: Request to borrow "${book.title}"`);
       const body = encodeURIComponent(
-        `Hi ${book.ownerName || 'there'},\n\nI would love to borrow your book "${book.title}" that you listed on ShelfShare!\n\nPlease head over to your "My Shelf" dashboard to approve my request whenever you're ready: https://shelfshare-five.vercel.app\n\nWhen and where would be a good time to meet up on campus so I can grab the book from you?\n\nThanks!\n${user.name}`
+        `Hi ${book.ownerName || 'there'},\n\nI would love to borrow your book "${book.title}" that you listed on ShelfShare!\nWhen and where would be a good time to meet up on campus so I can grab the book from you?\n\nThanks!\n${user.name}`
       );
       
       // Reverted back to Outlook Web deep-link as requested
