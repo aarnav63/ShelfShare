@@ -496,7 +496,7 @@ Thanks!
 ${user?.name || ''}`
   );
 
-  return `mailto:${ownerEmail}?subject=${subject}&body=${body}`;
+    return `https://outlook.office.com/mail/deeplink/compose?to=${ownerEmail}&subject=${subject}&body=${body}`;
 };
 
   const openEmailComposer = (book) => {
