@@ -479,23 +479,51 @@ export default function App() {
     setView('marketplace');
   };
 
+  const [pendingEmailBookId, setPendingEmailBookId] = useState(null);
+
+  const buildEmailUrl = (book) => {
+  const ownerEmail = `${book.ownerId.toLowerCase()}@bennett.edu.in`;
+
+  const subject = encodeURIComponent(`ShelfShare: Request to borrow "${book.title}"`);
+
+  const body = encodeURIComponent(
+`Hi ${book.ownerName || 'there'},
+
+I would love to borrow your book "${book.title}" that you listed on ShelfShare!
+When and where would be a good time to meet up on campus so I can grab the book from you?
+
+Thanks!
+${user?.name || ''}`
+  );
+
+  return `mailto:${ownerEmail}?subject=${subject}&body=${body}`;
+};
+
+  const openEmailComposer = (book) => {
+    const emailUrl = buildEmailUrl(book);
+    // Try reliable mailto invocation that works for a wider range of clients
+    const anchor = document.createElement('a');
+    anchor.href = emailUrl;
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+
+    // Fallback for browsers that do not trigger from anchor click
+    setTimeout(() => {
+      window.location.assign(emailUrl);
+    }, 100);
+  };
+
   const handleBorrow = async (book) => {
     if (!user) return;
     try {
       await axios.put(`${API_BASE}/${book.id}/request?requesterId=${user.id}&requesterName=${user.name}`);
       fetchBooks();
-      
-      const ownerEmail = `${book.ownerId.toLowerCase()}@bennett.edu.in`;
-      const subject = encodeURIComponent(`ShelfShare: Request to borrow "${book.title}"`);
-      const body = encodeURIComponent(
-        `Hi ${book.ownerName || 'there'},\n\nI would love to borrow your book "${book.title}" that you listed on ShelfShare!\nWhen and where would be a good time to meet up on campus so I can grab the book from you?\n\nThanks!\n${user.name}`
-      );
-      
-      // Reverted back to Outlook Web deep-link as requested
-      const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${ownerEmail}&subject=${subject}&body=${body}`;
-      window.open(outlookUrl, '_blank');
-
-    } catch (err) { console.error("Request failed", err); }
+      setPendingEmailBookId(book.id);
+    } catch (err) {
+      console.error("Request failed", err);
+    }
   };
 
   const handleApprove = (id, reqId, reqName, title) => {
@@ -646,6 +674,7 @@ export default function App() {
                 : <div className="book-grid">
                     {marketplace.map(book => {
                       const hasRequested = book.requests?.some(r => r.requesterId === user.id);
+                      const canCompose = hasRequested || pendingEmailBookId === book.id;
                       return (
                       <div className={`book-card ${getSpine(book.id)}`} key={book.id}>
                         <div className="book-card-body">
@@ -658,6 +687,15 @@ export default function App() {
                             <button className="btn-borrow" onClick={() => handleBorrow(book)} disabled={hasRequested}>
                               {hasRequested ? 'Requested' : 'Borrow'}
                             </button>
+                            {canCompose && (
+                              <button
+                                className="btn-borrow"
+                                style={{ marginLeft: '8px', background: 'rgba(74,144,217,0.14)', borderColor: 'rgba(74,144,217,0.35)', color: '#a5c5ee' }}
+                                onClick={() => openEmailComposer(book)}
+                              >
+                                Compose Email
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
