@@ -481,11 +481,11 @@ export default function App() {
 
   const [pendingEmailBookId, setPendingEmailBookId] = useState(null);
 
-  const buildEmailUrl = (book) => {
+const isMobile = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+const buildEmailParts = (book) => {
   const ownerEmail = `${book.ownerId.toLowerCase()}@bennett.edu.in`;
-
   const subject = encodeURIComponent(`ShelfShare: Request to borrow "${book.title}"`);
-
   const body = encodeURIComponent(
 `Hi ${book.ownerName || 'there'},
 
@@ -495,26 +495,40 @@ When and where would be a good time to meet up on campus so I can grab the book 
 Thanks!
 ${user?.name || ''}`
   );
-
-    return `https://outlook.office.com/mail/deeplink/compose?to=${ownerEmail}&subject=${subject}&body=${body}`;
+  return { ownerEmail, subject, body };
 };
 
-  const openEmailComposer = (book) => {
-    const emailUrl = buildEmailUrl(book);
-    // Try reliable mailto invocation that works for a wider range of clients
-    const anchor = document.createElement('a');
-    anchor.href = emailUrl;
-    anchor.style.display = 'none';
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
+const openEmailComposer = (book) => {
+  const { ownerEmail, subject, body } = buildEmailParts(book);
 
-    // Fallback for browsers that do not trigger from anchor click
+  if (isMobile()) {
+    const outlookUrl = `ms-outlook://compose?to=${ownerEmail}&subject=${subject}&body=${body}`;
+    const fallbackUrl = `mailto:${ownerEmail}?subject=${subject}&body=${body}`;
+
+    // Use iframe to silently attempt the deep link — no error notification
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    iframe.src = outlookUrl;
+
+    // If Outlook app opens, page goes hidden — track it
+    let appOpened = false;
+    const onHide = () => { appOpened = true; };
+    document.addEventListener('visibilitychange', onHide);
+
     setTimeout(() => {
-      window.location.assign(emailUrl);
-    }, 100);
-  };
+      document.removeEventListener('visibilitychange', onHide);
+      document.body.removeChild(iframe);
+      if (!appOpened) {
+        // Outlook app not installed, fall back to mailto silently
+        window.location.href = fallbackUrl;
+      }
+    }, 1200);
 
+  } else {
+    window.location.href = `https://outlook.office.com/mail/0/deeplink/compose?to=${ownerEmail}&subject=${subject}&body=${body}`;
+  }
+};
   const handleBorrow = async (book) => {
     if (!user) return;
     try {
