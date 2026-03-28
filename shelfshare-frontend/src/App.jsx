@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "./authConfig";
+import Footer from "./components/Footer";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api/books";
 
@@ -28,6 +29,7 @@ const GlobalStyle = () => (
       --rose-glow:    rgba(224,92,138,0.35);
       --sidebar-w:    260px;
     }
+ 
 
     html, body { height: 100%; }
 
@@ -105,7 +107,7 @@ const GlobalStyle = () => (
       border-right: 1px solid var(--glass-border);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       display: flex; flex-direction: column;
-      padding: 32px 20px;
+      padding: 32px 20px 72px;
       position: sticky; top: 0; height: 100vh; overflow-y: auto;
     }
     .sidebar-logo {
@@ -831,6 +833,7 @@ const openEmailComposer = (book) => {
           </div>
         </div>
       )}
+      <Footer/>
     </>
   );
 }
