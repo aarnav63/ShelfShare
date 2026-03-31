@@ -2,7 +2,7 @@
 
 **Launch announcement**
 
-ShelfShare is live at: https://shelfshare-one.vercel.app/
+ShelfShare is live at: https://shelfshareweb.vercel.app/
 
 
 ShelfShare is a peer-to-peer book exchange platform where students can list, request, and lend books within their campus community.

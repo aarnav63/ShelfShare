@@ -36,7 +36,7 @@ const Footer = () => {
             Shelf<span style={{ color: 'var(--amber)' }}>Share</span>
           </div>
           <span style={{
-            color: 'var(--muted)',
+            color: 'var(--text)',
             fontSize: '0.65rem',
             fontFamily: "'Inter', sans-serif",
           }}>
@@ -80,15 +80,15 @@ const Footer = () => {
         <div style={{
           fontFamily: "'Inter', sans-serif",
           fontSize: '0.7rem',
-          color: 'var(--muted)',
+          color: 'var(--text)',
           textAlign: 'right',
           whiteSpace: 'nowrap',
           flex: 1,
           display: 'flex',
           justifyContent: 'flex-end',
         }}>
-          Built by Aarnav &nbsp;·&nbsp;
-          <span style={{ opacity: 0.6 }}>&nbsp;© {new Date().getFullYear()} ShelfShare</span>
+          Built by Aarnav ·
+          <span style={{ opacity: 0.85, color: 'var(--text)' }}>&nbsp;© {new Date().getFullYear()} ShelfShare</span>
         </div>
 
       </footer>
