@@ -20,68 +20,84 @@ import com.shelfshare.repository.BookRepository;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = { "http://localhost:5173", "https://shelfshare-one.vercel.app" }, methods = { RequestMethod.GET,
-        RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS }, allowedHeaders = "*") // Allow
-                                                                                                                    // your
-                                                                                                                    // React
-                                                                                                                    // app
-                                                                                                                    // to
-                                                                                                                    // talk
-                                                                                                                    // to
-                                                                                                                    // this
 public class BookController {
 
-    @Autowired // automatic dependency injection
+    @Autowired
     private BookRepository repo;
 
-    // GET all books: http://localhost:8080/api/books
-    @GetMapping
-
-    public List<Book> getAll() {
-
-        return repo.findAll();
-
+    private String getUserIdFromJwt(org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String oid = jwt.getClaimAsString("oid");
+        if (oid != null && !oid.isBlank()) {
+            return oid;
+        }
+        return jwt.getSubject();
     }
 
-    // POST (Add) a book: http://localhost:8080/api/books
+    @GetMapping
+    public List<Book> getAll(@org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String userId = getUserIdFromJwt(jwt);
+        return repo.findByOwnerId(userId);
+    }
 
     @PostMapping
-
-    public Book add(@RequestBody Book book) {
-
-        book.setStatus("AVAILABLE"); // newly added books always available
-
+    public Book add(@RequestBody Book book, @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String userId = getUserIdFromJwt(jwt);
+        book.setOwnerId(userId);
+        book.setStatus("AVAILABLE");
+        if (book.getRequests() == null) {
+            book.setRequests(new java.util.ArrayList<>());
+        }
         return repo.save(book);
-
     }
 
     @PutMapping("/{id}/request")
-    public Book requestBook(@PathVariable String id, @RequestParam String requesterId, @RequestParam String requesterName) {
-        Book book = repo.findById(id).orElseThrow();
+    public Book requestBook(@PathVariable String id, @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String requesterId = getUserIdFromJwt(jwt);
+        String requesterName = jwt.getClaimAsString("name") != null ? jwt.getClaimAsString("name") : jwt.getClaimAsString("preferred_username");
+
+        Book book = repo.findById(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Book not found"));
         if (book.getRequests() == null) {
             book.setRequests(new java.util.ArrayList<>());
         }
         boolean exists = book.getRequests().stream().anyMatch(r -> r.getRequesterId().equals(requesterId));
         if (!exists) {
             book.getRequests().add(new com.shelfshare.model.Requester(requesterId, requesterName));
+            return repo.save(book);
         }
-        return repo.save(book);
+        return book;
     }
 
     @PutMapping("/{id}/approve")
-    public Book approveBook(@PathVariable String id, @RequestParam String requesterId, @RequestParam String requesterName, @RequestParam int days) {
-        Book book = repo.findById(id).orElseThrow();
+    public Book approveBook(@PathVariable String id, @RequestParam int days, @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String userId = getUserIdFromJwt(jwt);
+
+        Book book = repo.findById(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Book not found"));
+        if (!userId.equals(book.getOwnerId())) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Only owner can approve loan");
+        }
+
+        if (book.getRequests() == null || book.getRequests().isEmpty()) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, "No pending request to approve");
+        }
+
+        com.shelfshare.model.Requester firstRequester = book.getRequests().get(0);
         book.setStatus("ON_LOAN");
-        book.setBorrowerId(requesterId);
-        book.setBorrowerName(requesterName);
-        book.setRequests(new java.util.ArrayList<>()); // clear other requests
+        book.setBorrowerId(firstRequester.getRequesterId());
+        book.setBorrowerName(firstRequester.getRequesterName());
+        book.setRequests(new java.util.ArrayList<>());
         book.setDueDate(java.time.LocalDate.now().plusDays(days).toString());
         return repo.save(book);
     }
 
-    @PutMapping("/{id}/return") // updates the status
-    public Book returnBook(@PathVariable String id) {
-        Book book = repo.findById(id).orElseThrow();
+    @PutMapping("/{id}/return")
+    public Book returnBook(@PathVariable String id, @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String userId = getUserIdFromJwt(jwt);
+
+        Book book = repo.findById(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Book not found"));
+        if (!userId.equals(book.getOwnerId())) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Only owner can return book");
+        }
+
         book.setStatus("AVAILABLE");
         book.setBorrowerId(null);
         book.setBorrowerName(null);
@@ -90,11 +106,13 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    public void deleteBook(@PathVariable String id, @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt jwt) {
+        String userId = getUserIdFromJwt(jwt);
 
-    public void deleteBook(@PathVariable String id) {
-
+        Book book = repo.findById(id).orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Book not found"));
+        if (!userId.equals(book.getOwnerId())) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Only owner can delete book");
+        }
         repo.deleteById(id);
-
     }
-
 }
