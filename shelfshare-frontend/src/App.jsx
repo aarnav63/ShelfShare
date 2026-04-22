@@ -734,7 +734,6 @@ const openEmailComposer = (book) => {
                             <div className="shelf-row-sub">{book.author}</div>
                             {getDueDateDisplay(book.dueDate)}
                           </div>
-                          <button className="btn-return" onClick={() => handleReturn(book.id)}>Return</button>
                         </div>
                       ))
                   }
@@ -765,6 +764,9 @@ const openEmailComposer = (book) => {
                                 : <button className="btn-remove" onClick={() => handleDeleteListing(book.id)}>Remove listing</button>
                             }
                           </div>
+                          {book.status !== 'AVAILABLE' && (
+                            <button className="btn-return" onClick={() => handleReturn(book.id)}>Mark as returned</button>
+                          )}
                           <span className={`status-pill ${book.status === 'AVAILABLE' ? 'status-in' : 'status-out'}`}>
                             {book.status === 'AVAILABLE' ? 'In' : 'Out'}
                           </span>
