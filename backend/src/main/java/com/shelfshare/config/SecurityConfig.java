@@ -26,9 +26,8 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                .requestMatchers("/api/books/**").authenticated()
-                .anyRequest().permitAll())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+                .requestMatchers("/api/books/**").permitAll()
+                .anyRequest().permitAll());
 
         return http.build();
     }
@@ -36,7 +35,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "https://shelfshare-one.vercel.app"));
+        config.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "https://shelfshareweb.vercel.app",
+            "https://shelfshare-dlep.onrender.com"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
